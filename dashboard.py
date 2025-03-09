@@ -21,9 +21,8 @@ credenciales = {
 # cred = credentials.Certificate("./secret/credentials.json")
 cred = credentials.Certificate(credenciales)
 
-# Load dataset
+# Load dataset to import
 df_to_import = pd.read_csv("./dataset/movies.csv")
-
 
 # Function definitions
 def is_firebase_initialized():
@@ -43,7 +42,6 @@ def is_firebase_initialized():
         print(f"Error checking Firebase initialization: {e}")
         return False
 
-
 def import_to_firebase(df, collection_name):
     try:
         collection_list = [collection.id for collection in db.collections()]
@@ -60,24 +58,18 @@ def import_to_firebase(df, collection_name):
             print(
                 f'La colección "{collection_name}" ya existe. No se importó el DataFrame.'
             )
-
     except Exception as e:
         print(f"Error al importar DataFrame: {e}")
-
 
 def read_database_to_dataframe(collection_name) -> pd.DataFrame:
     """Lee todos los documentos de una colección de Firestore y los devuelve como un DataFrame de Pandas."""
     try:
-        docs = db.collection(collection_name).stream()
-        data = []
-        for doc in docs:
-            data.append(doc.to_dict())
-        df = pd.DataFrame(data)
-        return df
+        docs = list(db.collection(collection_name).stream())
+        data = list(map(lambda x: x.to_dict(), docs))
+        return pd.DataFrame(data)
     except Exception as e:
         print(f"Error al leer datos de Firestore: {e}")
         return None
-
 
 def insert_new_film(film):
     try:
@@ -86,8 +78,6 @@ def insert_new_film(film):
         st.success("¡Filme agregado correctamente!")
         # Update the local DataFrame
         df_films = pd.concat([df_films, pd.DataFrame([film])], ignore_index=True)
-
-
     except Exception as e:
         st.error(f"Error al agregar filme: {e}")
 
@@ -173,7 +163,6 @@ with st.sidebar:
             new_director = ""
         else:
             st.warning("Por favor, complete todos los campos.")
-
 
 # Apply filters
 final_results = filter_results.copy()
