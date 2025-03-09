@@ -6,7 +6,20 @@ from firebase_admin import firestore
 
 # Firebase configuration
 collection_name = "filmsDashboard"
-cred = credentials.Certificate("./secret/credentials.json")
+credenciales = {
+    "type": st.secrets["type"],
+    "project_id": st.secrets["project_id"],
+    "private_key": st.secrets["private_key"].replace("\\n", "\n"),
+    "client_email": st.secrets["client_email"],
+    "client_id": st.secrets["client_id"],
+    "auth_uri": st.secrets["auth_uri"],
+    "token_uri": st.secrets["token_uri"],
+    "auth_provider_x509_cert_url": st.secrets["auth_provider_x509_cert_url"],
+    "client_x509_cert_url": st.secrets["client_x509_cert_url"]
+}
+
+#cred = credentials.Certificate("./secret/credentials.json")
+cred = credentials.Certificate(credenciales)
 
 # Load dataset
 df_to_import = pd.read_csv("./dataset/movies.csv")
