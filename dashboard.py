@@ -15,14 +15,15 @@ credenciales = {
     "auth_uri": st.secrets["auth_uri"],
     "token_uri": st.secrets["token_uri"],
     "auth_provider_x509_cert_url": st.secrets["auth_provider_x509_cert_url"],
-    "client_x509_cert_url": st.secrets["client_x509_cert_url"]
+    "client_x509_cert_url": st.secrets["client_x509_cert_url"],
 }
 
-#cred = credentials.Certificate("./secret/credentials.json")
+# cred = credentials.Certificate("./secret/credentials.json")
 cred = credentials.Certificate(credenciales)
 
 # Load dataset
 df_to_import = pd.read_csv("./dataset/movies.csv")
+
 
 # Function definitions
 def is_firebase_initialized():
@@ -77,6 +78,18 @@ def read_database_to_dataframe(collection_name) -> pd.DataFrame:
         print(f"Error al leer datos de Firestore: {e}")
         return None
 
+
+def insert_new_film(film):
+    try:
+        # Add new film to Firestore
+        db.collection(collection_name).add(film)
+        st.success("¡Filme agregado correctamente!")
+        # Update the local DataFrame
+        df_films = pd.concat([df_films, pd.DataFrame([film])], ignore_index=True)
+
+
+    except Exception as e:
+        st.error(f"Error al agregar filme: {e}")
 
 # Initialize Firebase
 if not is_firebase_initialized():
@@ -144,6 +157,23 @@ with st.sidebar:
     new_name = st.text_input("Name:")
     new_company = st.selectbox("Company", df_films["company"].unique().tolist())
     new_director = st.text_input("Director:")
+    if st.button("Agregar filme"):
+        if new_name and new_company and new_director:
+            new_film = {
+                "name": new_name,
+                "company": new_company,
+                "director": new_director,
+            }
+            insert_new_film(new_film)
+            # Clear the input fields
+            new_name = ""
+            new_company = (
+                df_films["company"].unique().tolist()[0]
+            )  # Reset to first option
+            new_director = ""
+        else:
+            st.warning("Por favor, complete todos los campos.")
+
 
 # Apply filters
 final_results = filter_results.copy()
