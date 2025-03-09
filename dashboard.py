@@ -109,7 +109,11 @@ else:
 st.title("Netflix app")
 
 # Initialize variables for storing results
-filter_results = df_films.copy()  # Initialize with all data
+if df_films is not None:
+    filter_results = df_films.copy()  # Initialize with all data from Firebase
+else:
+    filter_results  = df_to_import.copy() #In case we cannot retrive the Firebase database, we use the local data.
+    
 search_results = None
 
 # Sidebar for filters
